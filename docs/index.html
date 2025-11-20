@@ -25,9 +25,10 @@
         <li class="milestone active" data-step="1"><span class="emoji">🏁</span><span class="label">Welcome</span></li>
         <li class="milestone" data-step="2"><span class="emoji">🧑‍🏫</span><span class="label">PI</span></li>
         <li class="milestone" data-step="3"><span class="emoji">👥</span><span class="label">Personnel</span></li>
-        <li class="milestone" data-step="4"><span class="emoji">✈️</span><span class="label">Travel</span></li>
-        <li class="milestone" data-step="5"><span class="emoji">📦</span><span class="label">Other Costs</span></li>
-        <li class="milestone" data-step="6"><span class="emoji">✅</span><span class="label">Review</span></li>
+        <li class="milestone" data-step="4"><span class="emoji">💊</span><span class="label">Fringe</span></li>
+        <li class="milestone" data-step="5"><span class="emoji">✈️</span><span class="label">Travel</span></li>
+        <li class="milestone" data-step="6"><span class="emoji">📦</span><span class="label">Other Costs</span></li>
+        <li class="milestone" data-step="7"><span class="emoji">✅</span><span class="label">Review</span></li>
       </ul>
     </section>
 
@@ -38,9 +39,9 @@
       <section class="step step-active" id="step-1">
         <h2 class="step-title">Welcome to Grant-Grid</h2>
         <p class="lead">
-          This wizard helps you build a **5-year** research budget.  
-          You will enter PIs, other personnel, travel, and other direct costs.  
-          At the end, you can **download an Excel file** that looks like your sample.
+          This wizard helps you build a <strong>5-year</strong> research budget.<br/>
+          You will enter PIs, other personnel, fringe rates, travel, and other direct costs.<br/>
+          At the end, you can <strong>download an Excel file</strong> that looks like your sample.
         </p>
         <div class="welcome-grid">
           <label class="field">
@@ -86,10 +87,23 @@
         </div>
       </section>
 
-      <!-- Step 4: Travel -->
+      <!-- Step 4: Fringe Rates -->
       <section class="step" id="step-4">
+        <h2 class="step-title">Fringe Rates</h2>
+        <p class="hint">
+          Enter the fringe benefit percentages for each group and each project year.
+          You can keep the same rate for all 5 years or change them year by year.
+        </p>
+        <div id="fringeList" class="card-list"></div>
+        <p class="hint">
+          Example FY23–24: Faculty 31.0%, UI professional staff &amp; Post Docs 41.3%, GRAs/UGRads 2.5%, Temp Help 8.3%.
+        </p>
+      </section>
+
+      <!-- Step 5: Travel -->
+      <section class="step" id="step-5">
         <h2 class="step-title">Travel</h2>
-        <p class="hint">Add each trip. Choose **Domestic** or **International**, then enter budgets for Years 1–5.</p>
+        <p class="hint">Add each trip. Choose <strong>Domestic</strong> or <strong>International</strong>, then enter budgets for Years 1–5.</p>
         <div class="collection">
           <div class="collection-head">
             <h3 class="sub">Trips</h3>
@@ -99,8 +113,8 @@
         </div>
       </section>
 
-      <!-- Step 5: Other Direct Costs -->
-      <section class="step" id="step-5">
+      <!-- Step 6: Other Direct Costs -->
+      <section class="step" id="step-6">
         <h2 class="step-title">Other Direct Costs</h2>
         <p class="hint">Add a cost item (e.g., software, materials). Enter amounts for Years 1–5. Up to 10 items.</p>
         <div class="collection">
@@ -112,8 +126,8 @@
         </div>
       </section>
 
-      <!-- Step 6: Review & Export -->
-      <section class="step" id="step-6">
+      <!-- Step 7: Review & Export -->
+      <section class="step" id="step-7">
         <h2 class="step-title">Review & Export</h2>
 
         <div class="review-section">
@@ -133,6 +147,11 @@
         <div class="review-section">
           <h3>Other Personnel</h3>
           <div id="outPers" class="summary simple-list"></div>
+        </div>
+
+        <div class="review-section">
+          <h3>Fringe Rates</h3>
+          <div id="outFringe" class="summary tableish"></div>
         </div>
 
         <div class="review-section">

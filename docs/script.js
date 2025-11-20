@@ -1,6 +1,6 @@
 // ======== STATE ========
 let currentStep = 1;
-const totalSteps = 6;
+const totalSteps = 7;
 
 const data = {
   projectName: '',
@@ -8,12 +8,12 @@ const data = {
   pi: '',
   coPIs: [],           // [{ name }]
   personnel: [],       // [{ role, name }]
+  fringe: [],          // [{ category, y1..y5 }]
   trips: [],           // [{ type, y1..y5 }]
   costs: []            // [{ label, y1..y5 }]
 };
 
 // ======== ELEMENTS ========
-
 
 const milestones = Array.from(document.querySelectorAll('.milestone'));
 const progressFill = document.getElementById('progressFill');
@@ -37,27 +37,30 @@ const coPIList = document.getElementById('coPIList');
 const addPers  = document.getElementById('addPers');
 const persList = document.getElementById('persList');
 
-// Step 4
+// Step 4 (Fringe)
+const fringeList = document.getElementById('fringeList');
+
+// Step 5
 const addTrip  = document.getElementById('addTrip');
 const tripList = document.getElementById('tripList');
 
-// Step 5
+// Step 6
 const addCost  = document.getElementById('addCost');
 const costList = document.getElementById('costList');
 
-// Step 6 outputs
+// Step 7 outputs
 const outProj   = document.getElementById('outProj');
 const outAgency = document.getElementById('outAgency');
 const outPI     = document.getElementById('outPI');
 const outCoPIs  = document.getElementById('outCoPIs');
 const outPers   = document.getElementById('outPers');
+const outFringe = document.getElementById('outFringe');
 const outTrips  = document.getElementById('outTrips');
 const outCosts  = document.getElementById('outCosts');
 const excelTable = document.getElementById('excelTable');
 
-
-// ================== ADDED: Remote Typeahead Helper ==================
-const API_BASE = window.API_BASE || "https://grant-grid.onrender.com";; // change if your API runs on another port
+// ================== Remote Typeahead Helper ==================
+const API_BASE = window.API_BASE || "https://grant-grid.onrender.com"; // change if your API runs on another port
 
 function debounce(fn, ms = 200) {
   let t;
@@ -113,9 +116,48 @@ function attachRemoteTypeahead(inputEl, role) {
 
 // Attach to the PI input immediately
 attachRemoteTypeahead(piName, 'PI');
-// ================== /ADDED ==================
+// ================== /Remote Typeahead ==================
 
 
+// ======== FRINGE INIT (creates the 4 default rows) ========
+function initFringeRows() {
+  if (!fringeList) return;
+
+  const categories = [
+    { category: 'Faculty', defaultRate: 31.0 },
+    { category: 'UI professional staff & Post Docs', defaultRate: 41.3 },
+    { category: 'GRAs/UGRads', defaultRate: 2.5 },
+    { category: 'Temp Help', defaultRate: 8.3 }
+  ];
+
+  fringeList.innerHTML = '';
+
+  categories.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'card fringe-row';
+    card.dataset.category = cat.category;
+
+    card.innerHTML = `
+      <div class="row-flex fringe-row-inner">
+        <div class="field" style="flex:1;">
+          <span>Category</span>
+          <div>${cat.category}</div>
+        </div>
+        <div class="field" style="flex:2;">
+          <span>Fringe Rate % (Years 1–5)</span>
+          <div class="year-grid">
+            <input type="number" step="0.1" min="0" placeholder="Y1" value="${cat.defaultRate}">
+            <input type="number" step="0.1" min="0" placeholder="Y2" value="${cat.defaultRate}">
+            <input type="number" step="0.1" min="0" placeholder="Y3" value="${cat.defaultRate}">
+            <input type="number" step="0.1" min="0" placeholder="Y4" value="${cat.defaultRate}">
+            <input type="number" step="0.1" min="0" placeholder="Y5" value="${cat.defaultRate}">
+          </div>
+        </div>
+      </div>
+    `;
+    fringeList.appendChild(card);
+  });
+}
 
 // ======== NAV + UI ========
 function goToStep(target, dir){
@@ -143,7 +185,7 @@ function goToStep(target, dir){
   updateProgress();
   updateButtons();
 
-  if (currentStep === 6) buildReview();
+  if (currentStep === 7) buildReview();
 }
 
 function updateProgress(){
@@ -189,7 +231,17 @@ function validateStep(){
       });
       return true;
 
-    case 4:
+    case 4: // Fringe
+      data.fringe = [];
+      fringeList.querySelectorAll('.fringe-row').forEach(card => {
+        const category = card.dataset.category;
+        const nums = Array.from(card.querySelectorAll('input')).map(i => Number(i.value || 0));
+        const [y1,y2,y3,y4,y5] = nums;
+        data.fringe.push({ category, y1,y2,y3,y4,y5 });
+      });
+      return true;
+
+    case 5:
       data.trips = [];
       tripList.querySelectorAll('.card').forEach(card => {
         const type = card.querySelector('select').value;
@@ -199,7 +251,7 @@ function validateStep(){
       });
       return true;
 
-    case 5:
+    case 6:
       data.costs = [];
       costList.querySelectorAll('.card').forEach(card => {
         const label = card.querySelector('input[name="label"]').value.trim();
@@ -245,6 +297,31 @@ function buildReview(){
       outPers.appendChild(row);
     });
   }
+
+  // Fringe
+  outFringe.innerHTML = '';
+  const fringeTable = document.createElement('div');
+  fringeTable.className = 'summary tableish';
+  if (!data.fringe || data.fringe.length === 0) {
+    fringeTable.innerHTML = '<div class="row">No fringe rates defined</div>';
+  } else {
+    fringeTable.innerHTML = `
+      <div class="head" style="display:grid;grid-template-columns:2fr repeat(5,1fr);gap:10px;">
+        <div>Category</div><div>Y1 %</div><div>Y2 %</div><div>Y3 %</div><div>Y4 %</div><div>Y5 %</div>
+      </div>
+      ${data.fringe.map(f => `
+        <div class="row" style="display:grid;grid-template-columns:2fr repeat(5,1fr);gap:10px;">
+          <div>${escapeHTML(f.category)}</div>
+          <div>${f.y1 || 0}</div>
+          <div>${f.y2 || 0}</div>
+          <div>${f.y3 || 0}</div>
+          <div>${f.y4 || 0}</div>
+          <div>${f.y5 || 0}</div>
+        </div>
+      `).join('')}
+    `;
+  }
+  outFringe.appendChild(fringeTable);
 
   // Trips
   outTrips.innerHTML = '';
@@ -348,6 +425,20 @@ function buildExcelTable(){
 
   rows += SEP;
 
+  // Fringe Rates (percentages only)
+  rows += `<tr><td colspan="7" style="font-weight:bold;background:#ddd;border:1px solid #000">Fringe Rates (%)</td></tr>`;
+  rows += `<tr>${H('Category')}${H('Y1 %')}${H('Y2 %')}${H('Y3 %')}${H('Y4 %')}${H('Y5 %')}${H('')}</tr>`;
+  if (data.fringe && data.fringe.length){
+    data.fringe.forEach(f => {
+      rows += `<tr>${TD(escapeHTML(f.category))}
+        ${TD(f.y1 || 0)}${TD(f.y2 || 0)}${TD(f.y3 || 0)}${TD(f.y4 || 0)}${TD(f.y5 || 0)}${TD('')}</tr>`;
+    });
+  } else {
+    rows += `<tr>${TD("None")}${TD("")}${TD("")}${TD("")}${TD("")}${TD("")}${TD("")}</tr>`;
+  }
+
+  rows += SEP;
+
   // Travel
   rows += `<tr><td colspan="7" style="font-weight:bold;background:#ddd;border:1px solid #000">Travel</td></tr>`;
   rows += `<tr>${H('Type')}${H('Y1')}${H('Y2')}${H('Y3')}${H('Y4')}${H('Y5')}${H('Total')}</tr>`;
@@ -414,10 +505,9 @@ addCoPI.addEventListener('click', ()=>{
   card.querySelector('.remove').addEventListener('click', ()=> card.remove());
   coPIList.appendChild(card);
 
-  // ======== ADDED: hook DB typeahead for this new input ========
+  // hook DB typeahead for this new input
   const input = card.querySelector('input');
   attachRemoteTypeahead(input, 'CO_PI');
-  // =============================================================
 });
 
 addPers.addEventListener('click', ()=>{
@@ -441,10 +531,9 @@ addPers.addEventListener('click', ()=>{
   card.querySelector('.remove').addEventListener('click', ()=> card.remove());
   persList.appendChild(card);
 
-  // ======== ADDED: hook DB typeahead for this new input ========
+  // hook DB typeahead for this new input
   const input = card.querySelector('input[type="text"]');
   attachRemoteTypeahead(input, 'PERSONNEL');
-  // =============================================================
 });
 
 addTrip.addEventListener('click', ()=>{
@@ -506,12 +595,21 @@ nextBtn.addEventListener('click', ()=>{
 });
 
 restartBtn.addEventListener('click', ()=>{
-  Object.assign(data, { projectName:'', fundingAgency:'', pi:'', coPIs:[], personnel:[], trips:[], costs:[] });
+  Object.assign(data, {
+    projectName:'', fundingAgency:'', pi:'',
+    coPIs:[], personnel:[], fringe:[], trips:[], costs:[]
+  });
   projectName.value=''; fundingAgency.value='';
   piName.value='';
-  coPIList.innerHTML=''; persList.innerHTML=''; tripList.innerHTML=''; costList.innerHTML='';
+  coPIList.innerHTML='';
+  persList.innerHTML='';
+  tripList.innerHTML='';
+  costList.innerHTML='';
+  if (fringeList) initFringeRows();
   goToStep(1,'back');
 });
 
 // Init
-updateProgress(); updateButtons();
+initFringeRows();
+updateProgress();
+updateButtons();
