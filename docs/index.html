@@ -12,8 +12,14 @@
 
   <div class="app">
     <header class="app-header">
-      <h1 class="title">Grant-Grid</h1>
-      <p class="subtitle">A playful, polished budget wizard</p>
+      <div>
+        <h1 class="title">Grant-Grid</h1>
+        <p class="subtitle">A playful, polished budget wizard</p>
+      </div>
+      <div class="user-bar">
+        <span id="userEmailLabel" class="user-email"></span>
+        <button id="logoutBtn" class="btn btn-ghost btn-small">Log out</button>
+      </div>
     </header>
 
     <!-- Progress -->
@@ -38,8 +44,18 @@
       <!-- Step 1: Welcome -->
       <section class="step step-active" id="step-1">
         <h2 class="step-title">Welcome to Grant-Grid</h2>
+
+        <!-- Saved budgets for this account -->
+        <section class="saved-block" id="savedBlock">
+          <div class="saved-head">
+            <h3>Your Saved Budgets</h3>
+            <button id="refreshBudgets" class="btn btn-ghost btn-small">Refresh</button>
+          </div>
+          <div id="savedBudgetsList" class="saved-list"></div>
+        </section>
+
         <p class="lead">
-          This wizard helps you build a <strong>5-year</strong> research budget.<br/>
+          This wizard helps you build a <strong>multi-year</strong> research budget (1–5 years).<br/>
           You will enter PIs, other personnel, fringe rates, travel, and other direct costs.<br/>
           At the end, you can <strong>download an Excel file</strong> that looks like your sample.
         </p>
@@ -92,8 +108,16 @@
         <h2 class="step-title">Fringe Rates</h2>
         <p class="hint">
           Enter the fringe benefit percentages for each group and each project year.
-          You can keep the same rate for all 5 years or change them year by year.
+          Use the controls below to choose how many years (1–5) your budget spans.
         </p>
+
+        <div class="year-controls">
+          <span class="hint">Years in budget:</span>
+          <button id="yearRemove" class="btn btn-ghost btn-small" type="button">− Remove Year</button>
+          <span id="yearLabel" class="year-label">1 Year</span>
+          <button id="yearAdd" class="btn btn-ghost btn-small" type="button">+ Add Year</button>
+        </div>
+
         <div id="fringeList" class="card-list"></div>
         <p class="hint">
           Example FY23–24: Faculty 31.0%, UI professional staff &amp; Post Docs 41.3%, GRAs/UGRads 2.5%, Temp Help 8.3%.
@@ -103,7 +127,10 @@
       <!-- Step 5: Travel -->
       <section class="step" id="step-5">
         <h2 class="step-title">Travel</h2>
-        <p class="hint">Add each trip. Choose <strong>Domestic</strong> or <strong>International</strong>, then enter budgets for Years 1–5.</p>
+        <p class="hint">
+          Add each trip. Choose <strong>Domestic</strong> or <strong>International</strong>, then enter budgets for each year
+          in your project (based on the Fringe step).
+        </p>
         <div class="collection">
           <div class="collection-head">
             <h3 class="sub">Trips</h3>
@@ -116,7 +143,7 @@
       <!-- Step 6: Other Direct Costs -->
       <section class="step" id="step-6">
         <h2 class="step-title">Other Direct Costs</h2>
-        <p class="hint">Add a cost item (e.g., software, materials). Enter amounts for Years 1–5. Up to 10 items.</p>
+        <p class="hint">Add a cost item (e.g., software, materials). Enter amounts for each year. Up to 10 items.</p>
         <div class="collection">
           <div class="collection-head">
             <h3 class="sub">Cost Items</h3>
@@ -164,7 +191,15 @@
           <div id="outCosts" class="summary tableish"></div>
         </div>
 
-        <p class="hint">Looks good? Export to Excel below. You can also go back and edit.</p>
+        <p class="hint">
+          Looks good? You can save this budget to your account or export to Excel.
+          Saved budgets will appear on the first step under "Your Saved Budgets."
+        </p>
+
+        <button id="saveBudgetBtn" type="button" class="btn btn-dark" style="margin-bottom:8px;">
+          Save Budget to My Account
+        </button>
+        <p id="saveBudgetMsg" class="hint"></p>
 
         <!-- Hidden table we convert to Excel -->
         <table id="excelTable" class="hide"></table>
@@ -179,6 +214,7 @@
       </footer>
     </main>
   </div>
+
   <script src="config.js"></script>
   <script src="script.js"></script>
 </body>

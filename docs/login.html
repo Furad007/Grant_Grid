@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Grant Grid – Sign In</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="login-body">
+  <div class="bg-ornament"></div>
+  <div class="bg-illustration"></div>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <h1 class="title">Grant Grid</h1>
+      <p class="subtitle">Sign in to manage your research budgets</p>
+
+      <div class="login-tabs">
+        <button id="tabSignIn"
+                class="tab active"
+                type="button"
+                onclick="ggSetMode('signin')">
+          Sign In
+        </button>
+        <button id="tabSignUp"
+                class="tab"
+                type="button"
+                onclick="ggSetMode('signup')">
+          Sign Up
+        </button>
+      </div>
+
+      <!-- NO <form>; just fields and a button -->
+      <div id="loginFields">
+        <label class="field">
+          <span>Email</span>
+          <input id="loginEmail" type="email"
+                 placeholder="you@example.com" />
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <input id="loginPassword" type="password"
+                 placeholder="••••••••" />
+        </label>
+
+        <p id="loginMessage" class="hint" style="min-height:18px;"></p>
+
+        <button id="loginSubmit"
+                type="button"
+                class="btn btn-dark"
+                style="width:100%;margin-top:6px;"
+                onclick="ggHandleLogin()">
+          Sign In
+        </button>
+      </div>
+
+      <p class="hint" style="margin-top:10px;">
+        Accounts are stored locally in your browser for demo purposes.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Simple "mode": Sign In vs Sign Up ----------
+    let ggMode = 'signin';
+
+    function ggSetMode(mode) {
+      ggMode = mode;
+      const tabIn  = document.getElementById('tabSignIn');
+      const tabUp  = document.getElementById('tabSignUp');
+      const submit = document.getElementById('loginSubmit');
+      const msg    = document.getElementById('loginMessage');
+
+      if (!tabIn || !tabUp || !submit) return;
+
+      if (mode === 'signin') {
+        tabIn.classList.add('active');
+        tabUp.classList.remove('active');
+        submit.textContent = 'Sign In';
+      } else {
+        tabUp.classList.add('active');
+        tabIn.classList.remove('active');
+        submit.textContent = 'Create Account';
+      }
+      if (msg) msg.textContent = '';
+    }
+
+    function ggHandleLogin() {
+      const emailEl = document.getElementById('loginEmail');
+      const passEl  = document.getElementById('loginPassword');
+      const msg     = document.getElementById('loginMessage');
+
+      if (!emailEl || !passEl) return;
+
+      const email = (emailEl.value || '').trim().toLowerCase();
+      const pass  = passEl.value || '';
+
+      if (!email || !pass) {
+        if (msg) msg.textContent = 'Please enter email and password.';
+        return;
+      }
+
+      // Optional: very light "password length" check
+      if (pass.length < 4) {
+        if (msg) msg.textContent = 'Password should be at least 4 characters.';
+        return;
+      }
+
+      // Try to remember which account is "logged in"
+      try {
+        localStorage.setItem('gg_email', email);
+        localStorage.setItem('gg_token', 'local-demo-' + Date.now());
+      } catch (e) {
+        // If storage fails, we just log and continue
+        console.warn('localStorage not available, continuing without persistence', e);
+      }
+
+      // Friendly message so you see something happen
+      if (msg) {
+        msg.textContent =
+          (ggMode === 'signup'
+            ? 'Account created. '
+            : '') + 'Opening budget builder...';
+      }
+
+      // Redirect to the main wizard page after a short pause
+      setTimeout(function () {
+        window.location.href = 'index.html'; // change if your main file has a different name
+      }, 400);
+    }
+
+    window.onload = function () {
+      ggSetMode('signin');
+    };
+  </script>
+</body>
+</html>
